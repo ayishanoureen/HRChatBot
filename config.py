@@ -89,7 +89,7 @@ LLM_PROVIDER = "gemini"
 # Get your API key: https://aistudio.google.com/app/apikey
 # Add to .env file:  GEMINI_API_KEY=your-key-here
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL   = "gemini-1.5-flash"     # Highly stable model with high free-tier capacity
+GEMINI_MODEL   = "gemini-3.5-flash"     # Highly stable model with high free-tier capacity
 LLM_TEMPERATURE = 0.1    # Very low = highly factual, no creative deviation
 LLM_MAX_TOKENS  = 2048   # Enough for the longest policy answers without truncation
 

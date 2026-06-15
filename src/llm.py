@@ -142,38 +142,55 @@ def call_gemini(prompt: str) -> str:
             "   Get a key at: https://aistudio.google.com/app/apikey"
         )
 
-    try:
-        client = genai.Client(api_key=GEMINI_API_KEY)
+    import time
+    max_retries = 3
+    delay = 1.0
 
-        config = types.GenerateContentConfig(
-            system_instruction=SYSTEM_INSTRUCTION,
-            temperature=LLM_TEMPERATURE,
-            max_output_tokens=LLM_MAX_TOKENS,
-        )
+    for attempt in range(max_retries):
+        try:
+            client = genai.Client(api_key=GEMINI_API_KEY)
 
-        logger.debug(f"Calling Gemini model '{GEMINI_MODEL}'")
+            config = types.GenerateContentConfig(
+                system_instruction=SYSTEM_INSTRUCTION,
+                temperature=LLM_TEMPERATURE,
+                max_output_tokens=LLM_MAX_TOKENS,
+            )
 
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-            config=config,
-        )
+            logger.debug(f"Calling Gemini model '{GEMINI_MODEL}' (attempt {attempt + 1}/{max_retries})")
 
-        # Check why generation stopped — MAX_TOKENS means answer was cut off
-        candidate = response.candidates[0] if response.candidates else None
-        if candidate:
-            finish = str(candidate.finish_reason)
-            if "MAX_TOKENS" in finish:
+            response = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=prompt,
+                config=config,
+            )
+
+            # Check why generation stopped — MAX_TOKENS means answer was cut off
+            candidate = response.candidates[0] if response.candidates else None
+            if candidate:
+                finish = str(candidate.finish_reason)
+                if "MAX_TOKENS" in finish:
+                    logger.warning(
+                        "⚠️  Gemini hit MAX_TOKENS — answer may be incomplete. "
+                        f"Increase LLM_MAX_TOKENS in config.py (currently {LLM_MAX_TOKENS})."
+                    )
+
+            return response.text.strip()
+
+        except Exception as e:
+            err_msg = str(e).lower()
+            is_transient = any(code in err_msg for code in ("503", "unavailable", "429", "rate limit", "resource_exhausted"))
+            
+            if attempt < max_retries - 1 and is_transient:
                 logger.warning(
-                    "⚠️  Gemini hit MAX_TOKENS — answer may be incomplete. "
-                    f"Increase LLM_MAX_TOKENS in config.py (currently {LLM_MAX_TOKENS})."
+                    f"⚠️ Gemini API returned transient error (attempt {attempt + 1}/{max_retries}): {e}. "
+                    f"Retrying in {delay:.1f}s..."
                 )
+                time.sleep(delay)
+                delay *= 2
+            else:
+                logger.error(f"Gemini API error: {e}")
+                return f"❌ Gemini error: {str(e)}"
 
-        return response.text.strip()
-
-    except Exception as e:
-        logger.error(f"Gemini API error: {e}")
-        return f"❌ Gemini error: {str(e)}"
 
 
 # ── Master Generate Function ───────────────────────────────────────────────────

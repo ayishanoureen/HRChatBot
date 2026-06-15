@@ -453,15 +453,15 @@ div[data-testid="stChatInput"] > div:focus-within {
 # ══════════════════════════════════════════════════════════════════════════════
 
 @st.cache_resource(show_spinner=False)
-def _load_backend():
-    from src.embeddings   import get_embedding_model
-    from src.vector_store import get_or_create_collection
-    return get_embedding_model(), get_or_create_collection()
+def _load_embedding_model():
+    from src.embeddings import get_embedding_model
+    return get_embedding_model()
 
 
 def _get_collection():
-    _, col = _load_backend()
-    return col
+    from src.vector_store import get_or_create_collection
+    return get_or_create_collection()
+
 
 
 def _ask(query: str):
@@ -757,7 +757,7 @@ def main():
 
         with st.spinner("⏳ Loading embedding model and vector store…"):
             try:
-                _load_backend()
+                _load_embedding_model()
                 col = _get_collection()
 
                 if col.count() == 0:
