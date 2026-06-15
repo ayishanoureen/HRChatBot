@@ -1,0 +1,16 @@
+# ── Phase 1: PDF Extraction & Preprocessing ───────────────────────────────────
+pdfplumber>=0.11.0          # PDF text extraction
+langchain>=0.3.0            # RAG framework
+langchain-text-splitters>=0.3.0  # RecursiveCharacterTextSplitter
+
+# ── Phase 2: Embeddings & Vector Store (install now, use later) ───────────────
+sentence-transformers>=3.0.0     # Local embedding models
+chromadb>=0.5.0                  # Local vector database
+
+# ── Phase 3: LLM & Chat Interface ─────────────────────────────────────────────
+streamlit>=1.35.0           # Web UI for the chatbot
+langchain-community>=0.3.0  # LLM integrations (Ollama, HuggingFace, etc.)
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+tqdm>=4.66.0                # Progress bars
+python-dotenv>=1.0.0        # .env file support for API keys
