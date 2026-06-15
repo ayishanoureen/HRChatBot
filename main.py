@@ -18,10 +18,19 @@ Quick start (first time):
   python main.py --phase all        # build the full pipeline
   python main.py --chat             # start chatting
 """
-
 import sys
 import logging
 import argparse
+import io
+
+# Force UTF-8 encoding on Windows to prevent UnicodeEncodeError when printing emojis/special characters
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except AttributeError:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 
 
 # ── Logging ────────────────────────────────────────────────────────────────────
